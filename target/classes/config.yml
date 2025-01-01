@@ -1,7 +1,0 @@
-regions:
-  mine1:
-    blocks:
-      - "STONE:50"
-      - "COAL_ORE:30"
-      - "IRON_ORE:20"
-    regen-delay: 5
