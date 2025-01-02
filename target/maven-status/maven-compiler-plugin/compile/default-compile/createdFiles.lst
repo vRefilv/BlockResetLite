@@ -1,4 +1,8 @@
-Refil\blockResetLite\events\BlockBreakListener.class
-Refil\blockResetLite\utils\BlockRegenerator.class
-Refil\blockResetLite\utils\RegisterPlugin.class
+Refil\blockResetLite\commands\BlockResetLiteCommand$1.class
 Refil\blockResetLite\BlockResetLite.class
+Refil\blockResetLite\utils\RegisterCommands.class
+Refil\blockResetLite\commands\BlockResetLiteTabCompleter.class
+Refil\blockResetLite\utils\RegisterEvents.class
+Refil\blockResetLite\commands\BlockResetLiteCommand.class
+Refil\blockResetLite\events\BlockBreakListener.class
+Refil\blockResetLite\utils\MineResetUtil.class

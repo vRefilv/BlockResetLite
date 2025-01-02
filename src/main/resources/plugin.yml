@@ -7,3 +7,7 @@ description: Something like MineResetLite but resets single blocks after a delay
 depend:
   - WorldGuard
   - FastAsyncWorldEdit
+commands:
+      blockresetlite:
+        description: Blockresetlite command with subcommands.
+        usage: /blockresetlite <subcommand>

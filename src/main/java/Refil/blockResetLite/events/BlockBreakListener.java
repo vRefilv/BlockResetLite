@@ -23,6 +23,7 @@ import java.util.Random;
 
 public class BlockBreakListener implements Listener {
 
+    private static final Random RANDOM = new Random(); // Static Random instance
     private final BlockResetLite plugin;
 
     public BlockBreakListener(BlockResetLite plugin) {
@@ -68,7 +69,7 @@ public class BlockBreakListener implements Listener {
         Map<Material, Integer> blockMap = parseBlockPalette(blockPalette);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            Material chosenMaterial = chooseRandomBlock(blockMap, new Random());
+            Material chosenMaterial = chooseRandomBlock(blockMap);
             if (chosenMaterial != null) {
                 location.getBlock().setType(chosenMaterial);
             }
@@ -88,9 +89,9 @@ public class BlockBreakListener implements Listener {
         return blockMap;
     }
 
-    private Material chooseRandomBlock(Map<Material, Integer> blockMap, Random random) {
+    private Material chooseRandomBlock(Map<Material, Integer> blockMap) {
         int totalWeight = blockMap.values().stream().mapToInt(i -> i).sum(); // Calculate total weight
-        int roll = random.nextInt(totalWeight); // Random number between 0 and total weight
+        int roll = RANDOM.nextInt(totalWeight); // Use static RANDOM instance
 
         int cumulativeWeight = 0;
         for (Map.Entry<Material, Integer> entry : blockMap.entrySet()) {

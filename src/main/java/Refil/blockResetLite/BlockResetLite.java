@@ -1,17 +1,16 @@
 package Refil.blockResetLite;
 
-import Refil.blockResetLite.utils.RegisterPlugin;
+import Refil.blockResetLite.utils.RegisterCommands;
+import Refil.blockResetLite.utils.RegisterEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BlockResetLite extends JavaPlugin {
 
-    private final RegisterPlugin RegisterUtil = new RegisterPlugin();
-
     @Override
     public void onEnable() {
-        if (!setupDependencies()) {
+        if (!HookManager()) {
             getLogger().severe("Missing required dependencies! Disabling BlockResetLite...");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
@@ -19,7 +18,9 @@ public final class BlockResetLite extends JavaPlugin {
 
         saveDefaultConfig();
         getLogger().info("BlockResetLite is enabled!");
-        RegisterUtil.registerPlugin(this); //Register plugin in one line
+        // Register commands and listeners
+        RegisterCommands.registerCommands(this);
+        RegisterEvents.registerListeners(this);
     }
 
     @Override
@@ -27,7 +28,7 @@ public final class BlockResetLite extends JavaPlugin {
         getLogger().info("BlockResetLite is disabled!");
     }
 
-    private boolean setupDependencies() {
+    private boolean HookManager() {
         // Check for WorldGuard
         Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
         if (worldGuard == null || !worldGuard.isEnabled()) {
