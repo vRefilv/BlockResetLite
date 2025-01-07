@@ -2,6 +2,7 @@ package Refil.blockResetLite.commands;
 
 import Refil.blockResetLite.BlockResetLite;
 import Refil.blockResetLite.utils.MineResetUtil;
+import Refil.blockResetLite.utils.RegisterCommands;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -23,7 +24,7 @@ public class BlockResetLiteCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§cUsage: /blockresetlite <subcommand>");
-            sender.sendMessage("§aAvailable subcommands: reload, give, reset");
+            sender.sendMessage("§aAvailable subcommands: reload, reset");
             return true;
         }
 
@@ -48,9 +49,13 @@ public class BlockResetLiteCommand implements CommandExecutor {
             sender.sendMessage("§cYou do not have permission to reload the configuration.");
             return;
         }
+
         plugin.reloadConfig();
         sender.sendMessage("§aConfiguration reloaded successfully.");
         plugin.getLogger().info("Configuration reloaded by " + sender.getName());
+
+        // Re-register the TabCompleter with the updated config
+        RegisterCommands.registerTabCompleter(plugin);
     }
 
     private void handleReset(CommandSender sender, String[] args) {
@@ -59,20 +64,9 @@ public class BlockResetLiteCommand implements CommandExecutor {
             return;
         }
 
-        if (args.length < 2) {
-            sender.sendMessage("§cUsage: /blockresetlite reset <mine name>");
-            return;
-        }
-
-        String mineName = args[1];
-        if (!sender.hasPermission("blockresetlite.reset")) {
-            sender.sendMessage("§cYou do not have permission to reset mines.");
-            return;
-        }
-
         Player player = (Player) sender;
 
-        // Get the RegionManager for the player's current world
+        // Fetch the region manager for the player's current world
         RegionManager regionManager = WorldGuard.getInstance()
                 .getPlatform()
                 .getRegionContainer()
@@ -80,6 +74,49 @@ public class BlockResetLiteCommand implements CommandExecutor {
 
         if (regionManager == null) {
             sender.sendMessage("§cNo regions are defined for this world.");
+            return;
+        }
+
+        // Check if the "all" subcommand is used
+        if (args.length == 2 && args[1].equalsIgnoreCase("all")) {
+            if (!sender.hasPermission("blockresetlite.reset.all")) {
+                sender.sendMessage("§cYou do not have permission to reset all mines.");
+                return;
+            }
+
+            sender.sendMessage("§aResetting all mines...");
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    boolean allSuccess = true;
+                    for (ProtectedRegion region : regionManager.getRegions().values()) {
+                        boolean success = MineResetUtil.resetRegion(plugin, region, player.getWorld());
+                        if (!success) {
+                            plugin.getLogger().severe("Failed to reset mine: " + region.getId());
+                            allSuccess = false;
+                        }
+                    }
+
+                    if (allSuccess) {
+                        sender.sendMessage("§aAll mines have been successfully reset.");
+                    } else {
+                        sender.sendMessage("§cSome mines could not be reset. Check the configuration or logs.");
+                    }
+                }
+            }.runTask(plugin);
+            return;
+        }
+
+        // Handle resetting a single mine
+        if (args.length < 2) {
+            sender.sendMessage("§cUsage: /blockresetlite reset <mine name|all>");
+            return;
+        }
+
+        String mineName = args[1];
+        if (!sender.hasPermission("blockresetlite.reset")) {
+            sender.sendMessage("§cYou do not have permission to reset mines.");
             return;
         }
 

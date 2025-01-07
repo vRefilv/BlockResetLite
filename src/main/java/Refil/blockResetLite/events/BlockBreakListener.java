@@ -66,7 +66,7 @@ public class BlockBreakListener implements Listener {
     private void scheduleRegeneration(Location location, ProtectedRegion region, ConfigurationSection regionConfig) {
         int delay = regionConfig.getInt("regen-delay", 5) * 20; // Convert seconds to ticks
         List<String> blockPalette = regionConfig.getStringList("blocks");
-        Map<Material, Integer> blockMap = parseBlockPalette(blockPalette);
+        Map<Material, Double> blockMap = parseBlockPalette(blockPalette);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             Material chosenMaterial = chooseRandomBlock(blockMap);
@@ -76,27 +76,35 @@ public class BlockBreakListener implements Listener {
         }, delay);
     }
 
-    private Map<Material, Integer> parseBlockPalette(List<String> blockPalette) {
-        Map<Material, Integer> blockMap = new HashMap<>();
+    private Map<Material, Double> parseBlockPalette(List<String> blockPalette) {
+        Map<Material, Double> blockMap = new HashMap<>();
         for (String entry : blockPalette) {
             String[] parts = entry.split(":");
             Material material = Material.getMaterial(parts[0].toUpperCase());
             if (material != null) {
-                int chance = Integer.parseInt(parts[1]); // The weight for this block
-                blockMap.put(material, chance);
+                try {
+                    // Parse weight as a double to support small values like 0.01
+                    double chance = Double.parseDouble(parts[1]);
+                    if (chance > 0) { // Only include positive weights
+                        blockMap.put(material, chance);
+                    }
+                } catch (NumberFormatException e) {
+                    // Skip invalid entry
+                    plugin.getLogger().warning("Invalid block weight format: " + entry);
+                }
             }
         }
         return blockMap;
     }
 
-    private Material chooseRandomBlock(Map<Material, Integer> blockMap) {
-        int totalWeight = blockMap.values().stream().mapToInt(i -> i).sum(); // Calculate total weight
-        int roll = RANDOM.nextInt(totalWeight); // Use static RANDOM instance
+    private Material chooseRandomBlock(Map<Material, Double> blockMap) {
+        double totalWeight = blockMap.values().stream().mapToDouble(i -> i).sum(); // Calculate total weight
+        double roll = RANDOM.nextDouble() * totalWeight; // Generate a random number with high precision
 
-        int cumulativeWeight = 0;
-        for (Map.Entry<Material, Integer> entry : blockMap.entrySet()) {
+        double cumulativeWeight = 0;
+        for (Map.Entry<Material, Double> entry : blockMap.entrySet()) {
             cumulativeWeight += entry.getValue();
-            if (roll < cumulativeWeight) {
+            if (roll <= cumulativeWeight) {
                 return entry.getKey();
             }
         }

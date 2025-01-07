@@ -1,7 +1,8 @@
+reset-mines-on-start: "true"
 regions:
   mine1:
     blocks:
-      - "STONE:50"
-      - "COAL_ORE:30"
-      - "IRON_ORE:20"
+      - "STONE:70"
+      - "IRON_ORE:30"
+      - "DIAMOND_ORE:0.01"
     regen-delay: 5

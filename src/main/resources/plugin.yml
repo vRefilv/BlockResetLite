@@ -11,3 +11,10 @@ commands:
       blockresetlite:
         description: Blockresetlite command with subcommands.
         usage: /blockresetlite <subcommand>
+permissions:
+  blockresetlite.reset:
+    description: Allows the player to reset a single mine.
+    default: op
+  blockresetlite.reset.all:
+    description: Allows the player to reset all mines.
+    default: op

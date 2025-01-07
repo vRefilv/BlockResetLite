@@ -15,10 +15,20 @@ public final class RegisterCommands {
         plugin.getLogger().info("Registering commands...");
         try {
             plugin.getCommand("blockresetlite").setExecutor(new BlockResetLiteCommand(plugin));
-            plugin.getCommand("blockresetlite").setTabCompleter(new BlockResetLiteTabCompleter(plugin.getConfig()));
+            registerTabCompleter(plugin); // Register TabCompleter
             plugin.getLogger().info("Commands registered successfully.");
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to register commands: " + e.getMessage());
+        }
+    }
+
+    // Static method to register or re-register the TabCompleter
+    public static void registerTabCompleter(BlockResetLite plugin) {
+        try {
+            plugin.getCommand("blockresetlite").setTabCompleter(new BlockResetLiteTabCompleter(plugin.getConfig()));
+            plugin.getLogger().info("TabCompleter registered successfully.");
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to register TabCompleter: " + e.getMessage());
         }
     }
 }
